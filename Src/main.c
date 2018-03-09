@@ -44,6 +44,7 @@
 #include "dmx.h"
 #include "led.h"
 #include "player.h"
+#include "shell.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -91,7 +92,7 @@ int main(void)
 //MX_IWDG_Init();
   MX_SDIO_SD_Init();
   MX_USART1_UART_Init();
-//MX_USART2_UART_Init();
+  MX_USART2_UART_Init();
   MX_WWDG_Init();
   MX_FATFS_Init();
 
@@ -103,7 +104,11 @@ int main(void)
 
   player_init();
 
+  RemoteInit();
+
+#ifndef DEBUG
   HAL_WWDG_Start(&hwwdg);
+#endif
 
   MX_TIM2_Init();
   MX_TIM3_Init();
@@ -117,6 +122,8 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+    /*! - process incoming data */
+    shellDoProcess();
 
   }
   /* USER CODE END 3 */

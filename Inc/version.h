@@ -17,7 +17,7 @@ typedef struct
 }softwareDate_t;
 
 #define SOFTWARE_VERSION_MAJOR	1
-#define SOFTWARE_VERSION_MINOR	3
+#define SOFTWARE_VERSION_MINOR	5
 
 #define SOFTWARE_DATE_DAY	05
 #define SOFTWARE_DATE_MONTH	03

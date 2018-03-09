@@ -31,7 +31,6 @@ void operating_data_process(void)
 			data_store_global_save();
 		}
 	}
-
 }
 
 void operating_data_button_pressed(uint8_t button_num)

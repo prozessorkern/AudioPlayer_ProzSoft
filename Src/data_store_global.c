@@ -11,48 +11,41 @@ UINT out;
 
 void data_store_global_load(void)
 {
-	uint16_t counter = 0;
-	do
-	{
-		res = f_open(&global_file_pointer, GLOBAL_FILE_NAME, FA_READ);
+  uint16_t counter = 0;
+  do
+  {
+    res = f_open(&global_file_pointer, GLOBAL_FILE_NAME, FA_READ);
 
-		counter ++;
+    counter ++;
 
-	}while(res != FR_OK && counter < 5);
+  }while(res != FR_OK && counter < 10);
 
-	counter = 0;
-	do
-	{
-		res = f_open(&global_file_pointer, GLOBAL_FILE_NAME, FA_READ);
+  if(res == FR_OK)
+  {
+  f_read(&global_file_pointer, &data_store_global, sizeof(dataStorageGlobal_t), &out);
+  }
 
-		counter ++;
+  if( (out != sizeof(dataStorageGlobal_t)) ||
+      (res != FR_OK) ||
+      (data_store_global.version != GLOBAL_DATA_VERSION))
+    {
+      data_store_global.version = GLOBAL_DATA_VERSION;
+      data_store_global.adress = 0;
+      data_store_global.description[0] = 0;
+      data_store_global.name[0] = 0;
+      data_store_global.operation_data.operating_time = 0;
+      data_store_global.operation_data.buttons_pressed[0] = 0;
+      data_store_global.operation_data.buttons_pressed[1] = 0;
+      data_store_global.operation_data.buttons_pressed[2] = 0;
+      data_store_global.operation_data.buttons_pressed[3] = 0;
+      data_store_global.dmx_size = DEFAULT_DMX_SIZE;
 
-	}while(res != FR_OK && counter < 5);
-
-	if(res == FR_OK)
-	{
-		f_read(&global_file_pointer, &data_store_global, sizeof(dataStorageGlobal_t), &out);
-	}
-
-	if(out != sizeof(dataStorageGlobal_t) || res != FR_OK)
-	{
-		data_store_global.description[0] = 0;
-		data_store_global.name[0] = 0;
-		data_store_global.operation_data.operating_time = 0;
-		data_store_global.operation_data.buttons_pressed[0] = 0;
-		data_store_global.operation_data.buttons_pressed[1] = 0;
-		data_store_global.operation_data.buttons_pressed[2] = 0;
-		data_store_global.operation_data.buttons_pressed[3] = 0;
-		data_store_global.dmx_size = DEFAULT_DMX_SIZE;
-
-		for(counter = 0; counter < DMX_MAX_CHANNEL; counter ++)
-		{
-			data_store_global.dmx_data[counter] = 0;
-		}
-
-	}
-
-	res = f_close(&global_file_pointer);
+    for(counter = 0; counter < DMX_MAX_CHANNEL; counter ++)
+    {
+      data_store_global.dmx_data[counter] = 0;
+    }
+  }
+  res = f_close(&global_file_pointer);
 }
 
 void data_store_global_save(void)
@@ -84,7 +77,7 @@ void data_store_global_get_dmx(uint8_t *data)
 
 void data_store_set_operation_data(operationData_t *operation_data)
 {
-	memcpy(&(data_store_global.operation_data), operation_data, sizeof(dataStorageGlobal_t));
+	memcpy(&(data_store_global.operation_data), operation_data, sizeof(operationData_t));
 }
 
 void data_store_get_operation_data(operationData_t *operation_data)
@@ -185,4 +178,14 @@ uint16_t data_store_get_dmx_size(void)
 void data_store_record_default_dmx(void)
 {
 	memcpy(data_store_global.dmx_data, dmx_data + 1, data_store_global.dmx_size);
+}
+
+uint8_t data_store_global_get_adress(void)
+{
+  return data_store_global.adress;
+}
+
+void data_store_global_set_adress(uint8_t adress)
+{
+  data_store_global.adress = adress;
 }

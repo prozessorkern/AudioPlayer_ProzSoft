@@ -20,8 +20,6 @@
 #define CONFIG_PORT_ACK 	0xFF
 #define CONFIG_PORT_ERROR	0x00
 
-#define CONFIG_PORT_UART					USART1
-
 // Funktionspointer für command port Funktionen
 typedef void ( *configPortFunction_t )( uint8_t *data, uint8_t length );
 

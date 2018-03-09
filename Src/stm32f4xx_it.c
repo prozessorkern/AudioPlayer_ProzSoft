@@ -47,6 +47,9 @@
 #include "power_amp.h"
 #include "operating_data.h"
 #include "wwdg.h"
+#include "prozStdio.h"
+#include "shell.h"
+#include "remote.h"
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -127,14 +130,35 @@ uint32_t status;
 
 	if(status & UART_FLAG_RXNE)
 	{
-		config_port_receive_handler((uint8_t)data);
+		//config_port_receive_handler((uint8_t)data);
+	  receiveByte(&localRingBuffer, data);
 	}
 
 	else if(status & UART_FLAG_TC)
 	{
 		USART1->SR &= ~(UART_FLAG_TC);
-		config_port_send_handler();
+		localSendHandler();
 	}
+}
+
+void USART2_IRQHandler(void)
+{
+uint32_t data;
+uint32_t status;
+
+  status = USART2->SR;
+  data = USART2->DR;
+
+  if(status & UART_FLAG_RXNE)
+  {
+    RemoteReceiveByte(data);
+  }
+
+  else if(status & UART_FLAG_TC)
+  {
+    USART2->SR &= ~(UART_FLAG_TC);
+    RemoteDoProcess();
+  }
 }
 
 /**
