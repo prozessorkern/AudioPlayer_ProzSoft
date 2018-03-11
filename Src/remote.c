@@ -132,6 +132,7 @@ void RemoteDoProcess(void)
     remoteShellBuffer.sendBuffer.busy = 0u;
     remoteShellBuffer.sendBuffer.writePtr = 0u;
     remoteShellBuffer.sendBuffer.readPtr = 0u;
+
     state = WAIT;
   }
 
@@ -246,6 +247,7 @@ void RemoteSendHandler(void)
 
 void RemoteMasterTransmit(uint8_t tempAdr)
 {
+  lastActionTick = HAL_GetTick();
   remoteAdr = tempAdr;
   master = 1u;
   state = CALC_HDR;
