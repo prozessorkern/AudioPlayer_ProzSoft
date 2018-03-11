@@ -10,7 +10,8 @@
 #define GLOBAL_DESCRIPTION_LENGTH	61
 #define GLOBAL_DATA_VERSION       1
 
-#define GLOBAL_FILE_NAME			"global.cfg"
+#define GLOBAL_FILE_NAME      "global.cfg"
+#define GLOBAL_TEMP_FILE_NAME "g_temp.cfg"
 
 typedef struct
 {

@@ -5,15 +5,17 @@
 
 dataStorageGlobal_t data_store_global;
 
-FRESULT res;
-FIL global_file_pointer;
-UINT out;
-
 void data_store_global_load(void)
 {
   uint16_t counter = 0;
+  FRESULT res;
+  FIL global_file_pointer;
+  UINT out;
+  UINT tempOut;
+
   do
   {
+    f_close(&global_file_pointer);
     res = f_open(&global_file_pointer, GLOBAL_FILE_NAME, FA_READ);
 
     counter ++;
@@ -22,7 +24,37 @@ void data_store_global_load(void)
 
   if(res == FR_OK)
   {
-  f_read(&global_file_pointer, &data_store_global, sizeof(dataStorageGlobal_t), &out);
+    f_read(&global_file_pointer, &data_store_global, sizeof(dataStorageGlobal_t), &out);
+  }
+
+  if((res != FR_OK) || (out != sizeof(dataStorageGlobal_t)))
+  {
+    counter = 0u;
+    do
+    {
+      f_close(&global_file_pointer);
+      res = f_open(&global_file_pointer, GLOBAL_TEMP_FILE_NAME, FA_READ);
+
+      counter ++;
+
+    }while(res != FR_OK && counter < 10);
+
+    if(res == FR_OK)
+    {
+      f_read(&global_file_pointer, &data_store_global, sizeof(dataStorageGlobal_t), &out);
+    }
+
+    /*! - copy the existing "good" file as new global.cfg */
+    if((res == FR_OK) && (out == sizeof(dataStorageGlobal_t)))
+    {
+      f_unlink(GLOBAL_FILE_NAME);
+      res = f_open(&global_file_pointer, GLOBAL_FILE_NAME, FA_READ | FA_WRITE | FA_CREATE_NEW);
+
+      if(res == FR_OK)
+      {
+        res = f_write(&global_file_pointer, &data_store_global, sizeof(dataStorageGlobal_t), &tempOut);
+      }
+    }
   }
 
   if( (out != sizeof(dataStorageGlobal_t)) ||
@@ -50,18 +82,47 @@ void data_store_global_load(void)
 
 void data_store_global_save(void)
 {
+  FIL global_file_pointer;
+  UINT out;
+  uint16_t counter = 0;
+  FRESULT res;
+
 	res = f_close(&global_file_pointer);
 
-	res = f_unlink("temp.del");
+	res = f_unlink(GLOBAL_TEMP_FILE_NAME);
 
-	res = f_rename(GLOBAL_FILE_NAME, "temp.del");
+  counter = 0u;
+  do
+  {
+    f_close(&global_file_pointer);
+    res = f_open(&global_file_pointer, GLOBAL_TEMP_FILE_NAME, FA_READ | FA_WRITE | FA_CREATE_NEW);
 
-	res = f_open(&global_file_pointer, GLOBAL_FILE_NAME, FA_READ | FA_WRITE | FA_CREATE_NEW);
+    counter ++;
 
-	if(res == FR_OK)
-	{
-		res = f_write(&global_file_pointer, &data_store_global, sizeof(dataStorageGlobal_t), &out);
-	}
+  }while(res != FR_OK && counter < 10);
+
+  if(res == FR_OK)
+  {
+    res = f_write(&global_file_pointer, &data_store_global, sizeof(dataStorageGlobal_t), &out);
+  }
+
+  /* if the temp file wrote correctly write the same to the real file */
+  if(res == FR_OK)
+  {
+    do
+    {
+      f_close(&global_file_pointer);
+      res = f_open(&global_file_pointer, GLOBAL_FILE_NAME, FA_READ | FA_WRITE | FA_CREATE_NEW);
+
+      counter ++;
+
+    }while(res != FR_OK && counter < 10);
+
+    if(res == FR_OK)
+    {
+      res = f_write(&global_file_pointer, &data_store_global, sizeof(dataStorageGlobal_t), &out);
+    }
+  }
 
 	res = f_close(&global_file_pointer);
 
